@@ -170,10 +170,10 @@ int ultima(int argc, char **argv) {
     }
 
     char *target_name;
-    monster_t *monster;
+    monster_t *target;
     mob_iterator_t *iter = make_mob_iterator(&the_player.current_room->mob);
     printf("1\n");
-    while((monster = next_monster(iter))){
+    while(target = next_monster(iter), target != NULL){
     	printf("2\n");
 		if(argc > 2 && !strcmp(argv[1], "at")) {
 			target_name = argv[2];
@@ -182,7 +182,6 @@ int ultima(int argc, char **argv) {
 		}
 		printf("3\n");
 		// find the monster
-		monster_t *target = monster;
 
 		// give up if we can't find it
 		if(target == NULL) {
@@ -191,12 +190,15 @@ int ultima(int argc, char **argv) {
 		}
 		printf("4\n");
 		// inflict damage
-		printf("%d level \n", the_player.level);
-		//int damage_amount = 100;
+		int playerlvl = the_player.level;
+		printf("%d level \n", playerlvl);
+		printf("pass 4.5");
+		int damage_amount = 100;
 		printf("hello");
 		printf("ULTIMA ATTACK! %d damage to %s.\n", damage_amount, target->name);
 		damage(target, damage_amount);
 		printf("gb");
+		i++;
     }
     printf("5\n");
     delete_mob_iterator(iter);
