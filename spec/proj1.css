@@ -1,0 +1,20 @@
+#frame {
+	width:650px;
+	margin-right:auto;
+	margin-left:auto;
+	margin-top:10px;
+	padding:0px;
+	text-align:left;
+}
+
+#aside {
+	background: #FFCC99;	
+}
+
+#source-code {
+    background: #AAAAAA;	
+}
+
+#terminal {
+    background: #CCCCFF;
+}

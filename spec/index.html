@@ -1,0 +1,473 @@
+<html>
+    <head>
+    	<title>CS61C Summer 2008 &mdash; Project 1</title>
+    	<LINK REL=StyleSheet HREF="proj1.css" TYPE="text/css" MEDIA="screen, print">
+	</head>
+
+	<body>
+		<div id="frame">
+			<center>
+				<b>
+					University of California at Berkeley<br>
+					College of Engineering<br>
+					Department of Electrical Engineering and Computer Science<br>
+				</b>
+				<p>CS 61C, Summer 2008</p>
+
+				<p><h2>Project 1 &mdash; World of 61C AdventureCraftHack</h2></p>
+				<p><b><font color="#0000AA">Extended to Sunday, July 13th @ 11:59pm</font></b></p>
+<s>				<p><b><font color="#0000AA">Due Friday, July 11th @ 11:59pm</font></b></p></s>
+				<p><b><font color="#000000" style="BACKGROUND-COLOR: yellow">Last Updated 7/10 @ 1:15pm</font></b></p>
+				<p><b><font color="#0000AA">TA: <a href="mailto:cs61c-tm@inst.eecs.berkeley.edu">Richard Guo</a></font></b></p>
+				<p><b><font color="#0000AA">Original authors (i.e. these guys are awesome): Matt Johnson and Casey Rodarmor</font></b></p>
+				<p></p>
+                </center>
+
+<p><b>Yet Another Note:</b> For anyone who copied over files before 1:15 pm on 7/10, please replace your <code>special_gamefiles/puzzles.o</code> with the one located at <br /><code>~cs61c/proj/01/special_gamefiles/puzzles.o</code> <br />
+Also, copy over 2 new files, <code>patch.c</code> and <code>patch.h</code>, from <code>~cs61c/proj/01/patch.c</code> and <code>~cs61c/proj/01/patch.h</code> <br />
+<s>playthegame is broken at the moment. We are working on a fix as fast as possible.</s></p>
+
+<p><b>Another Note:</b> For anyone who copied over files before 8:15 pm on 7/5, please replace your puzzles.c with the one located at ~cs61c/proj/01/puzzles.c
+</p>
+
+<p><b>IMPORTANT NOTE:</b> Some of the project files were updated on Saturday, 2008.07.05. If you copied the project files on or before that day, you <b>must update</b> your project files. However, none of them were files that you need to edit, and they will not affect any of the code you have written. To update your files, run the commands listed below from your project directory:</p>
+
+<p>
+<pre id="terminal">
+rm puzzles.o cs61c-world.lvl main.c Makefile
+	
+cp -r ~cs61c/proj/01/special_gamefiles ~cs61c/proj/01/main.c \
+	~cs61c/proj/01/Makefile ~cs61c/proj/01/puzzles.c .
+</pre>
+</p>
+
+<p>Note: There was a typo in the original monsters.h file comments, in which it asked you to implement some functions in commands.c instead of the correct location of monsters.c. The files are updated in <code>~cs61c/proj/01</code> now.
+				
+<pre id="toc">
+<a href="#overview">Project Overview</a>
+<a href="#starting">Getting Started</a>
+    <a href="#files">File Summary</a>
+    <a href="#playing">Playing the Game</a>
+<a href="#assignment">Assignment</a>
+    <a href="#part0">Part 0: Let there be rooms!</a>
+        <a href="#fileformat">Level File Format</a>
+    <a href="#part1">Part 1: Get go()-ing!</a>
+    <a href="#part2">Part 2: Monster Mash_t</a>
+    <a href="#part3">Part 3: Magic</a>
+<a href="#survival">Survival Tips</a>
+    <a href="#svn">Mini SVN Tutorial</a>
+    <a href="#pitfalls">Pitfalls</a>
+<a href="#submission">Submission</a>
+<a href="#efe">Extra for Experts</a>
+</pre>
+
+				<a name="overview"></a>
+				<h2>Project Overview</h2>
+
+				<p>The usual story with video games is that there are programmers who make the game and gamers who play the game&mdash;the two parties and their actions are completely separate. But for this project game, programming the game is part of playing it! To progress through the game world you will need to implement game features, and every feature you complete will allow you to progress further. After you complete each part of the assignment, you should try playing the game to explore how far you can get.</p>
+
+				<p>We made this brand new project because other 61C projects have been seriously lacking in FUN! And what's more fun than an adventure game?! We've done our best to make this framework simple and extensible, and we hope that you'll have fun creating new monsters, spells, and levels. You can even add new features!</p>
+
+				<p>Wow. I am super excited. Are you? Awesome. Let's move on and check out the framework that you'll build on.</p>
+
+				<a name="starting"></a>
+				<h2>Getting Started</h2>
+				
+				<p>The first step is to copy the game framework files into your home directory:</p>
+
+<p>
+<pre id="terminal">
+cs61c-tm@quasar ~ > <b>cp -r ~cs61c/proj/01/ ~/proj1</b>
+cs61c-tm@quasar ~ > <b>cd proj1</b>
+cs61c-tm@quasar ~/proj1 > <b>ls</b>
+Makefile            globals.c           monsters.c          special_gamefiles/
+commands.c          globals.h           monsters.h          testworld.lvl
+commands.h          level.c             obj/                util.c
+common.h            level.h             puzzles.c           util.h
+game.c              level_table         puzzles.h
+game.h              main.c              spec/
+</pre>
+</p>
+
+				<a name="files"></a>
+				<h3>File Summary</h3>
+				<p>Here's a short description of each file, with the ones you'll need to edit in bold:</p>
+				
+				<p>
+				<ul>
+				<li> Makefile &mdash; contains compilation directives. Run <code>gmake</code> to build your project with the directives in Makefile. Make sure you take a look inside, we've given you a few useful shortcuts. For instance, try <code>gmake debug</code>.
+				<li> obj &mdash; By default, the Makefile puts compiled object files in this directory.
+				<li> common.h &mdash; Contains header files used throughout the project, so that we don't have to include them individually.
+				<li> globals.c &mdash; Global variable definitions, specifically <code>room_array</code>, <code>num_rooms</code>, and <code>the_player</code>. Declarations are in globals.h
+				<li> main.c &mdash; Contains the main read-eval-print loop.
+				<li> util.c and util.h &mdash; A few random utility functions that don't belong anywhere else.
+				<li> <b>level.c</b> and level.h &mdash; Contains functions and structs related to level loading.
+				<li> <b>commands.c</b> and commands.h &mdash; All the in-game commands are implemented here. A sweet example of data-directed programming with function pointers!
+				<li> <b>game.c</b> and game.h &mdash; Lots of game related game internals, including magic, damage, and experience functions.
+				<li> <b>monsters.c</b> and <b>monsters.h</b> &mdash; Back-end for monster implementation. The header file defines an interface that you must implement.
+				<li> testworld.lvl &mdash; A very simple level file.
+				<li> puzzles.h &mdash; Gives a very simple interface to set up puzzles inside levels. You don't have to know anything about the puzzle files.
+				<li> puzzles.c &mdash; A stub file to allow compilation on any machine, but it doesn't contain any real implementations of the puzzles. If you're interested in expanding this file to allow you to create your own game world with puzzles, ask us about it after you finish the project assignment!
+				<li> special_gamefiles &mdash; This is a directory which contains the game world we made for you to play. It contains a puzzles.o object file which contains code for the in-game puzzles, and it's already compiled (but not linked) so as to keep those puzzles secret! When you run <code>gmake playthegame</code> it uses the puzzles.o file contained in this directory instead of the one generated from the provided puzzles.c. Note you can only run <code>gmake playthegame</code> on <code>nova.cs</code> and other lab machines of the same platform, since puzzles.o is platform-dependent!
+				</ul>
+				</p>
+				
+				<p>This is a very large codebase for a 61 series project! Make sure you check out the <a href="#survival">Survival Tips section</a> for ideas about how to make it more manageable.</p>
+				
+
+<p><b>Before you program and after you finish each part of the project, *make sure* to test out your implementation in <i>cs61c-world.lvl</i>. It's where you will begin your zany adventure, use your newly implemented skills and learn what you will need in the tough hours to come! (You can also use <i>testworld.lvl</i> to quickly test out some of the simpler implementation details, but its not very exciting).</b></p>
+	
+	<p><b>You can only play the cs61c-world.lvl level on lab machines!</b> As an unfortunate consequence of only distributing the <i>puzzles.o</i> object file (which is only compiled for the <code>nova.cs</code> platform), you can only play the main game world of cs61c-world.lvl on lab machines (or by <code>ssh</code>ing into lab machines). To play the game, use the <code>gmake playthegame</code> command. You can always play any test levels or levels of your own creation as described in the section below.</p>
+
+				<a name="playing"></a>
+				<h3>Playing the Game</h3>
+				<p>Once you implement some of the features, you will be able to play the test world. An example transcript of interacting with the game is below:</p>
+
+<p>
+<pre id="terminal">
+	cs61c-tc@pulsar ~ > <b>gmake</b>
+	<i>Stuff prints out</i>
+    cs61c-tc@pulsar ~ > <b>./game</b>
+    -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+    Welcome to game, the CS 61C adventure extravaganza!
+    -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+    You wake up.
+    you are in room #0
+    There is an exit to the east
+    > go east
+    you are in room #1
+    There are exits to the north and west
+    > dawdle 15
+    You dawdle for 15 seconds...
+    > ^D
+    cs61c-tc@pulsar ~ > 
+</pre>
+</p>
+
+				<p>You can run the game with any level by calling <code>./game <i>your-level-filename</i></code> after running <code>gmake</code>. The <i>testworld.lvl</i> file is the default when the game is called with no arguments.</p>
+
+                <p>However, the real fun is in <i>special_gamefiles/cs61c-world.lvl</i>, which will run automatically if you run <code>gmake playthegame</code> on a lab machine like <code>nova.cs</code>. When you start the game, you should see the following lines:</p>
+
+<p>
+<a name="pitfall1"></a>
+<pre id="terminal">
+	cs61c-tc@pulsar ~ > <b>gmake playthegame</b>
+    -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+    Welcome to ./game, the CS 61C adventure extravaganza!  
+    -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+    You wake up.
+    You are in a cold, concrete-floored room. There are no windows and almost 
+    no light. The only thing you can make out is the faint outline of a door 
+    to the south.
+    There is an exit to the south.
+    > 
+</pre>
+</p>
+
+				<p>Here is a list of commands in the game (some of them not implemented for you):</p>
+				
+<p>
+<div id="terminal">
+<ul>
+<li> <code>look</code> &mdash; Look around the current room.
+<li> <code>attack <i>monster_name</i></code> &mdash; Attacks the first monster with <i>monster_name</i>. If multiple monsters with the same name are present, successive calls to attack will target the same monster.
+<li> <code>dawdle <i>num_seconds</i></code> or <code>wait <i>num_seconds</i></code> &mdash; Wait the given number of seconds of the game time. If it is called with no argument, it will wait for 15 seconds.
+<li> <code>quit</code> or <code>exit</code> &mdash; Ends the game.
+<li> <code>status</code> &mdash; Prints out the player's status, including hit points and experience.
+<li> <code>help</code> &mdash; Prints out all currently available command names.
+<li> <code>cast <i>spell</i> <i>target</i></code> &mdash; Cast the spell at the given target.
+<li> <code>interact</code> &mdash; Interact with a room's puzzles or people.
+<li> <code>go <i>direction</i></code> &mdash; Move around the level. Valid directions are <code>north</code>, <code>south</code>, <code>east</code>, <code>west</code>, <code>up</code>, and <code>down</code>.
+</ul>
+</div>
+</p>
+
+				<a name="assignment"></a>
+				<h2>Assignment</h2>
+				
+				<p>To make sure that everything's ready to go, make sure you can compile and run the game. Do this by running <code>gmake</code> from within the <code>proj1</code> directory. The project will compile and run, but will immediately crash. This is by design; it's trying to load the level file, but <code>load_level()</code> isn't doing a whole lot of anything at the moment. Let's fix that.</p>
+
+				<a name="part0"></a>
+				<h3>Part 0: Let there be rooms!</h3>
+				<p>To initialize the game world from disk, you need to complete <code>load_level()</code>, found in level.c. The function prototype from level.h is reproduced below:</p>
+				
+<p><pre id="terminal"><code>room_t *load_level(char *filename);</code></pre></p>
+				
+				<p>The function should open the file named by <code><i>filename</i></code>, set up <code>room_array[]</code> (a global array of <code>room_t</code> structs), and return a pointer to the starting room. The function will allocate memory on the heap, but because that memory will exist for the duration of the program, there is no need to free any of the memory allocated in <code>load_level()</code>.</p>
+
+				<p>The <code>load_level()</code> function itself is partially implemented in level.c. You will need to fill in the code to perform three tasks:</p>
+					
+					<ul>
+                    <li> <b>Create and initialize the <code>room_array[]</code> data structure.</b> The data structure must be allocated and initialized so that all of the <code>room_t</code> fields, as well as fields of sub-structs, are initialized to NULL or false, as appropriate. The exceptions are <code>room_id</code>, which should be set to the room index from the level file; and </code>mob</code>, which you'll take care of in part 2. <b>You should set the function pointers in the puzzle_t to each be NULL.</b>
+                    <li> <b>Room description strings.</b> The <code>description</code> field of each <code>room_t</code> should point to the human readable room description which follows that room's room_id in the level file. <b>The string should not end with a newline. fgets() will return a string with a newline, so overwrite it with a null terminator. Room description strings should NOT include the room number, but instead should begin with the first non-whitespace character after the room number.</b>
+					<li> <b>Connect the rooms</b> The <code>exits[]</code> array in each <code>room_t</code> is indexed by the direction enum. Each entry in the array should contain a pointer to the appropriate room if there is an exit in that direction, and locked exits (specified by cant-go lines) should have the <code>locked</code> field set to <code>true</code>. Each <code>exit_t</code> that is not used (does not exist in the game) should keep its <code>dest</code> pointer set to NULL. Note that every exit is meant to be bi-directional: if you <code><i>can-go north 1 2</i></code>, that implies that you can also go south from 2 to 1.
+					</ul>
+					</p>
+					
+				<a name="fileformat"></a>
+				<h4>Level File Format</h4>
+					<p>A level file has the general format shown below, where lines starting with "***" are not literally in the file. An simple example can be found in the testworld.lvl file.
+
+<p>
+<pre id="terminal">
+<i>NUM_ROOMS</i>
+
+0 <i>This is a room description, printed whenever a player enters the room.</i>
+1 <i>This is another description.</i>
+2 <i>And another!</i>
+*** MORE LINES HERE, UP TO INDEX (NUM_ROOMS - 1) ***
+
+can-go north 0 1       *** AN UNLOCKED EXIT ***
+cant-go west 1 2       *** A LOCKED EXIT ***
+*** MORE LINES HERE ***
+</pre>
+</p>	
+
+					<p>A level file must start with an integer number that indicates the total number of rooms.</p>
+					<p>Next, there is whitespace (at least two newlines, as in the above example). In the next block each room is described: at the start of each line is a room number, then there is non-newline whitespace, and then the room description string. The description string is ended by a newline. The room description block will always have one line per room, and the room index at the start of each line is guaranteed to be valid (within bounds) but it may be multiple digits. <b>Don't assume that the room numbers in the description block are in order, and don't assume that there is a description for each room (some numbers may be missing).</b></p>
+					
+					<p>The room description block is followed by more whitespace (at least two newlines, as above). The final block is the connection block, which describes how rooms should be linked. Each line will start with either "can-go" or "cant-go," which declare an unlocked or locked exit between rooms (respectively). Locks are NOT bi-directional: a "cant-go north 0 1" line will set up a door that is locked from 0 going north, but it will also set up an exit in room 1 going south that is not locked.</p>
+                    <p>After either "can-go" or "cant-go" there is non-newline whitespace, followed by a direction name, which is the direction of the exit from the FROM_ROOM to the TO_ROOM. The possible direction names can be found in <code>direction_names[]</code> in level.c. Finally, two numbers are given, separated by non-newline whitespace, which are the FROM_ROOM and TO_ROOM, in that order, which are the room indices to be connected. The indices will always be valid room indices. As an example, the line <code>cant-go north 0 1</code> should connect the north exit of room 0 to room 1, the south exit of room 1 to room 0, and set the <code>locked</code> boolean of room 0's north exit to <code>true</code>. (while leaving the locked boolean of room 1's southern exit alone)
+						
+					<p>We will not test your solution on level files with repeated, poorly formed, or conflicting connecting statements, e.g. <code>can-go north 0 1</code> followed by <code>can-go north 0 2</code>.</p>
+
+<div id="aside">
+<h4>Data Structures to Understand:</h4>
+<p>
+<ul>
+<li> Everything in level.h except for the <code>puzzle_t</code> struct and any <code>puzzle_t</code> fields. Puzzles are only for TA usage.
+</ul>
+</p>
+
+<h4>Functions to Understand:</h4>
+<p>
+<ul>
+<li> <code>skip_characters()</code> in util.c
+<li> <code>member()</code> in util.c
+<li> The <code>flip_direction</code> macro in level.h
+<li> Provided code blocks in <code>load_level()</code> in level.c.
+</ul>
+</p>
+
+<h4>Lines of code to add: 25</h4>
+</div>
+				<a name="part1"></a>
+				<h3>Part 1: Get <code>go()</code>-ing!</h3>
+				<p>Try loading the game and see what you can do! Not much, huh? Being able to move around is fun, so why don't you implement the <code>go()</code> function in commands.c. <code>Go()</code> moves the player from room to room by updating the <code>current_room</code> pointer in <code>the_player</code>, a global variable.</p>
+				
+				<p>Since the <code>go()</code> command is issued in the game just like a command line in the shell, the arguments are passed exactly as in <code>main()</code>. For example, if you type the following when in game:</p>
+
+<p>
+<pre id="terminal">
+> go north
+</pre>
+</p>
+
+				<p>The arguments passed to <code>go</code> will be <code>argc = 2, argv = {"go", "north"}</code>.</p>
+				
+				<p>Your <code>go()</code> function should check to see if the exit in the direction to move is locked, and only move the player if it is not. All commands return the amount of time that command took, and go() is no exception. It should return <code>0</code> if the player attempts to move in a direction where there is no exit, <code>FAILED_MOVE_TIME</code> if there is but it is locked, and <code>MOVE_TIME</code> if the move is successful.</p>
+
+<div id="aside">
+<h4>Data Structures to Understand:</h4>
+<p>
+<ul>
+<li> <code>room_t</code> and <code>exit_t</code> in level.h
+<li> (optional) <code>commands[]</code> and <code>cmd_entry_t</code> in commands.c
+</ul>
+</p>
+
+<h4>Functions to Understand:</h4>
+<p>
+<ul>
+<li> (optional) <code>lookup_command</code> in commands.c
+<li> (optional) other command functions
+<li> (optional) main read-eval-print loop
+<li> (optional) <code>tokenizer()</code> in util.c and <code>strtok()</code> the library functions
+</ul>
+</p>
+
+<h4>Lines of code to add: 35</h4>
+</div>
+
+				<a name="part2"></a>
+				<h3>Part 2: Monster Mash_t</h3>
+				<p>After implementing the <code>go</code> command, you should be able to explore quite a bit of the game world. Try it out! Remember, when you see a locked door, use the <code>interact</code> command to start solving the puzzle.</p>
+				
+				<p>Eventually, you will come to an obstacle you cannot pass without being harder/better/faster/stronger. You must <i>increase your level</i>! But to do that, you're going to need to add some monsters to your world...
+
+                <p>In order for every room in the game to hold a variable number of monsters, you will implement a variable length data structure called a <code>mob_t</code>. The code for this part is self contained within <i>monsters.h</i> and <i>monsters.c</i>. A <code>mob_t</code> is just a dynamic data structure of <code>monster_t</code>s. It supports a function called <code>spawn_new_monster(mob_t **mob_handle)</code> which adds a random <code>monster_t</code> to the <code>mob_t</code>, get the first monster of a particular type with <code>find_monster(mob_t *mob, char *type)</code>. You'll also support <br /><code>append_monster(mob_t **mob_handle, monster_t *monster)</code> and <br /><code>delete_monster(mob_t **mob_handle, monster_t *monster)</code>, which add and remove monsters from mobs.</p>
+
+<p>Note that some functions take mob pointers (<code>mob_t *</code>) while others take <br />mob handles (<code>mob_t **</code>) as arguments. Make sure you understand the difference, and if you get stuck, draw a picture!</p>
+
+				<p>But wait, there's more. In order to provide the best data-structure interface ever, you'll also implement a <code>mob_iterator_t</code>, which will provide a convenient interface for outside code to access the monsters in a <code>mob_t</code>.</p>
+				
+				<p>Check out this snippet, a loop which sets the hp of all monsters in a mob to 0:</p>
+				<pre id="source-code">
+    monster_t *monster;
+    
+    // create a new mob_iterator_t
+    mob_iterator_t *iter = make_mob_iterator(&amp;the_player.current_room-&gt;mob);
+    
+    // iterate over every monster in the mob_t
+    while((monster = next_monster(iter))) {
+        monster-&gt;hp = 0;
+    }
+    
+    // and finally, call delete_mob_iterator() to delete any space
+    // that make_mob_iterator may have allocated
+    delete_mob_iterator(iter);
+				</pre>
+				
+				<p>You are not responsible for what happens if <code>delete_mob_iterator()</code> is never called by outside code. Also, it is assumed that outside code will not add or remove monsters from a <code>mob_t</code> between calls to <code>make_mob_iterator()</code> and <code>delete_mob_iterator()</code>.</p>
+				
+				<p>This part of the project gives you a lot of freedom in design: as long as you support the interface defined in <i>monsters.h</i>, you can use any data structure you want! Be sure to read and think a bit before jumping into the code. Drawing a pictures always helps!</p>
+				
+				<p>Once you're done with with monsters, make sure you update the room initialization code you wrote in <i>level.c</i>. You'll have to do whatever initialization is needed to make sure that the <code>mob_t*</code> in each room starts off in an acceptable state.</p>
+				
+                <div id="aside">
+                <h4>Data Structures to Understand:</h4>
+                <p>
+                <ul>
+                    <li> Even though you won't need to know it's specifics, you should know that <code>monster_t</code> exists, since your data structure will contain <code>monster_t*</code>s.
+                    <li> You should understand the interface to <code>mob_iterator_t</code> thoroughly. The fact that you must support it will influence your choice of data structure to use for <code>mob_t</code>.
+                </ul>
+                </p>
+
+                <h4>Functions to Understand:</h4>
+                <p>
+                <ul>
+                    <li> Understand the interface we want you to implement (defined in <i>monsters.h</i> file).
+                    <li> In order to implement random monsters, you'll probably want to know about <code>rand()</code>, which lives in stdlib.h. Here's <a href="http://www.cplusplus.com/reference/clibrary/cstdlib/rand.html">a good description</a>.
+                </ul>
+                </p>
+
+		<h4>Lines of Code: 125</h4>
+                </div>
+
+				<a name="part3"></a>
+				<h3>Part 3: Magic</h3>
+				
+				<p>Before you head on to the next implementation section, try playing the game! You should be able to do quite a bit in the game world before you need magic.</p>
+				
+				<p>You'll come to a point where you need at least one magic spell, so this last implementation section is all about getting the <code>cast</code> command to work to imbue the world with magic.</p>
+				
+				<p>To get casting to work, you need to implement the <code>get_spell()</code> function in <i>game.c</i>. After a player issues the <code>cast</code> command, <code>get_spell()</code> checks the <code>level_table[]</code> for a spell entry whose name matches the provided string. For example, after receiving the in-game command "cast fireball" we want to check for a spell called "fireball" and, if we find it, return its corresponding function pointer. The <code>level_table[]</code> is included via a macro in <i>game.c</i>, which essentially copies-and-pastes the exact text found in the <i>level_table</i> file. We keep that section in a separate file so that we can easily swap it out for another level table when testing your code.
+				
+				<p>You also need to implement the <code>get_spell_level()</code> function in <i>game.c</i>, which takes the name of a spell being cast and returns the level required to use that spell according to the level table. <b>Each element ("row") in the level table corresponds to a player level: the player's level is one more than the element's index, so the first element (at index 0) corresponds to player level 1, the second (at index 1) to player level 2, etc.</b> If you don't understand the distinction between levels and experience, post to the newsgroup!</p>
+				
+				<p>Finally, you must implement the <code>cast()</code> function in <i>commands.c</i>. You will need to understand function pointer syntax, since you need to call the function returned by <code>get_spell()</code>. Also, notice that the <code>fireball()</code> spell we have implemented expects arguments like <code>argc = 2</code>, <code>argv = {"fireball", "goblin"}</code>. In other words, it doesn't expect to see <code>"cast"</code> as the first entry in its <code>argv</code> argument, so you shouldn't just paste the exact same <code>argc</code> and <code>argv</code> that <code>cast()</code> is called with. Be sure to have checks in case the <code>cast</code> command is issued with an unexpected number of arguments.
+				
+<div id="aside">
+<h4>Data Structures to Understand:</h4>
+<p>
+<ul>
+<li> <code>level_table[]</code> and <code>level_entry</code> in game.c
+<li> Check out the function pointer typedef for spells in game.h
+</ul>
+</p>
+
+<h4>Functions to Understand:</h4>
+<p>
+<ul>
+<li> <code>fireball()</code> in game.c
+<li> (optional) <code>damage()</code> in game.c
+</ul>
+</p>
+<h4>Lines of code to add: 20</h4>
+</div>
+
+                <a name="survival"></a>
+                <h2>Survival tips</h2>
+                
+                <p>Getting lost in a large codebase is easy, but there are a few things you can do about it.</p>
+                
+                <p><code>grep</code> is a great tool for finding functions, types, and variables. Don't know where <code>the_player</code> is declared? Just run <tt><b>grep the_player *.h</b></tt> from within the project directory. Nobody is blessed with the natural ability to navigate large projects, and it's one of the most useful skills you can learn.</p>
+                
+                <p>Make it a habit to read the code which surrounds and makes use of your own. You can learn a lot from context, like how your function will be called, when it will be called, and what it's expected to do. Code reading is an oft overlooked skill, but it can save you a whole mess of time and effort.</p>
+                
+                <p>Experiment! Don't be afraid to write some C to verify your model of how things work. Any time you're not sure about something, think of a way to verify it from within a little test program. Writing, compiling, and fixing something is the best way to learn. After all, the compiler is the final authority.</p>
+
+				<p>Also, if you like playing the game but are annoyed by the lack of a "save your game" command, OR if you want to try debugging some specific things in-game, add debug commands. When we were making the game world, we added commands to jump to any room index, add experience to the player (to level up), and to unlock any doors. <b>Be sure you do not include these extra commands in your submission, since they will confuse the autograder!</b></p>
+				
+				<p>Make your own tests! Don't just rely on our simple test files (like level files); make your own!</p>
+                
+                <a name="svn"></a>
+                <h3>Mini SVN Tutorial</h3>
+                
+                <p>Version control is a wonderful tool for simplifying development. You can use it to track changes to your files, revert to previous reversions, and figure out <i>exactly</i> where you introduced a bug. For those of you who already know svn, or want to take the time to learn, here's a whirlwind tutorial on making your own repository on the inst machines:</p>
+
+<p>First create a new repository named <i>proj1_repository</i>:</p>
+<pre id="terminal">
+    cs61c-tc@nova [~] svnadmin create proj1_repository
+</pre>
+
+<p>Get the full path of your homedir, and check out a working copy of proj1_repository. Make sure <tt>file:</tt> is followed by <i>three</i> forward slashes. Two because it's a URL, and one for the root directory:</p>
+<pre id="terminal">
+    cs61c-tc@nova [~] <b>pwd</b>
+    <i>(YOUR HOME DIR)</i>
+    cs61c-tc@nova [~] <b>svn co file://(YOUR HOME DIR)/proj1_repository proj1_wc</b>
+    Checked out revision 0.
+</pre>
+
+<p>Copy all the framework files into your working copy, add them via svn, and commit them to the repository:</p>
+<pre id="terminal">
+    cs61c-tc@nova [~] <b>cd proj1_wc</b>
+    cs61c-tc@nova [~/proj1_wc] <b>cp -r ~cs61c/proj/01/* .</b>
+    cs61c-tc@nova [~/proj1_wc] <b>svn add *</b>
+    A         Makefile
+    A         commands.c
+    &lt;snip&gt;
+    A         util.c
+    A         util.h
+    cs61c-tc@nova [~/proj1_wc] <b>svn commit -m "Initial check-in of proj1 framework"</b>
+    Adding         Makefile
+    Adding         commands.c
+    <snip>
+    Adding         util.c
+    Adding         util.h
+    Transmitting file data ...................
+    Committed revision 1.
+</pre>
+                <p>Once you've got the repo working, you'll need to know some svn commands to interact with it. Here are some important ones:
+                 <i></i>, <i></i>, <i></i>, and <i>commit</i>.</p>
+                 
+                 <p>
+                 <ul>
+                 <li> <tt><b>svn add FILE1 [FILE2 ...]</b></tt> &mdash; Marks new files for addition to the repo. They'll only actually get added when you run <i>svn commit</i>
+                 <li> <tt><b>svn commit</b></tt> &mdash; Update the repository with your local changes.
+                 <li> <tt><b>svn up</b></tt> &mdash; Update your working copy from the repository. You won't need this, since you'll be the only one making changes to it.
+                 <li> <tt><b>svn revert FILE1 [FILE2 ...]</b></tt> &mdash; Removes local changes to files, reverting them back to the versions in the repo.
+                 <li> <tt><b>svn help</b></tt> &mdash; Lists available commands. For more help on a specific command, do <tt><b>svn help COMMAND_NAME</b></tt>.
+                 </ul>
+                 </p>
+                 
+                 <p>It might seem silly to keep a repository just for you, but once you experience the wonders of version control you'll never go back. It will improve your work flow, prevent file deletion disasters, and help you track your changes. It will also make experimentation and exploration easier, since you'll always be able to roll back your changes.</p>
+
+				<a name="pitfalls"></a>
+				<h3>Common Pitfalls (a checklist)</h3>
+				<p>Below is a list of common mistakes from past student solutions to this project. It would be a good idea to go down the list and double-check you don't have the same mistakes.</p>
+				
+				<ul>
+					<li><b>Having two newlines print with room descriptions.</b> When you store the room description strings in <code>load_level()</code>, the strings should <i>NOT</i> have newlines as their last characters! Don't forget that <code>fgets()</code> will grab a newline into the buffer: don't copy it over. To check this potential bug, make sure the room description that your game prints in the starting room of <i>cs61c-world.lvl</i> looks like the <a href="#pitfall1">example in the Playing the Game section above</a>.</p>
+					<li><b>Relative frequency spawning</b> has by far been the section where students lose the most points. You should not build large data structures in memory. If you have questions about this part, check the newsgroup and add any questions you have.</p>
+				</ul>
+
+				<a name="submission"></a>
+				<h2>Submission</h2>
+				<p>All your code should be contained in the provided files, and <code>gmake</code> should build your program without any warnings.</p>
+
+				<p>When you're ready to submit, cd into your project directory, <code>gmake clean</code>, and then <code>submit proj1</code>.</p>
+				
+				
+	
+	            <a name="efe"></a>
+				<h2>Extra for experts</h2>
+	
+				<p>Wow, you rock. You built a whole world from raw text files, populated it with dire monsters, and gave our protagonist some spells to fight them. You may have even plumbed the depths of <i>cs61c-world.lvl</i>, and discovered the dark secrets lurking within.</p>
+				    
+				<p>You might think that the fun is over&mdash;but the adventure doesn't have to end here!!! Proj1's unofficial extra for experts is to implement something cool. Seriously, anything. A new spell, a new game feature, or even your own world. Although you can't share code, feel free to post new puzzle.o/puzzle.h and level files to the newsgroup. Go nuts and have fun with it; game programming can be a lot of fun!</p>
+				    
+				<p>PS As much as we are dying to see all of your awesome new stuff, please keep the extra for experts <i>separate</i> from your to-be-graded submission. This project is going to be hard enough to auto-grade as it is!</p>
+			</div>
+	</body>
+</html>
