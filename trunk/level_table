@@ -1,0 +1,16 @@
+// the amount of exp needed to reach a level
+// and the spells gained at each level
+// the index into the table corresponds to the level
+level_entry level_table[] = {
+    {0,   "splash", splash},     // Level 1. You must keep this entry here to play the game.
+    {10,  "fireball", fireball}, // Level 2. You must keep this entry here to play the game.
+    {25,  "heal", heal},
+    {45,  "",         NULL},
+    {70,  "",         NULL},
+    {100, "",         NULL},
+    {135, "",         NULL},
+    {175, "",         NULL},
+    {220, "",         NULL},
+    {270, "ultima",   ultima}
+};
+
