@@ -1,5 +1,6 @@
 #include "monsters.h"
 #include "common.h"
+#include "time.h"
 
 void debug(char * s);
 
@@ -9,12 +10,15 @@ void debug(char * s);
 // there must be at least one level 1 monster.
 monster_t monsters[] = {
     // name     attack   level hp  damage  exp  frequency  description
-    {"goblin",  "bite",  1,    2,  1,      4,   1,         "mean spirited goblin"},
+	{"bat",     "screech",1,   2,  1,      3,   1,         "tiny annoy bat"},
+	{"goblin",  "bite",  1,    2,  1,      4,   1,         "mean spirited goblin"},
     {"troll",   "whack", 1,    3,  1,      5,   1,         "giant troll"},
     {"ghost",   "lick",  1,    4,  1,      6,   1,         "scary ghost"},
-    {"pig",		"headbutt",1,  4,  1,      6,   1,         "fat pig"},
+    {"pig",		"headbutt",2,  5,  2,      7,   1,         "fat pig"},
     {"donkey",  "kick",  2,    5,  3,      15,  1,         "small brown donkey"},
     {"squirrel","gnaw",  3,    13, 5,      45,  1,         "grotesque, irradiated squirrel"},
+    {"hornet",	"sting", 3,    10, 6,      35,  1,         "buzzing hornet"},
+    {"pidgeon", "peck",  4,    15, 6,      50,  1,         "dirty grey pidgeon"},
     {"NULL",	"",	    0,		0,	0,		0,	0,			""} // not a real monster!!
 };
 
@@ -49,15 +53,16 @@ int num_monsters(mob_t *mob) {
 // or NULL if the name string is not matched in this mob
 monster_t *find_monster(mob_t *mob, char *name) {
 	debug("find monster!");
-	int i;
-	mob_node_t *cnode = mob->head;
-	debug("pass");
+	//int i;
+	//mob_node_t *cnode = mob->head;
+
+/*
 	for(i = 0; i < mob->num; i++){
 		debug("in loop");
 		if(strcmp(name, cnode->mon->name) == 0){
 			debug("found monster");
 			monster_t *monster;
-			monster = (monster_t *) malloc(sizeof(monster_t));
+			//monster = (monster_t *) malloc(sizeof(monster_t));
 			monster = cnode->mon;
 			debug("return monster");
 			return monster;
@@ -68,6 +73,21 @@ monster_t *find_monster(mob_t *mob, char *name) {
 	}
 	debug("can not find monster");
 	return NULL;
+*/
+
+
+	monster_t *monster;
+	mob_iterator_t *iter = make_mob_iterator(mob);
+	while((monster = next_monster(iter))){
+		if(strcmp(monster->name, name) == 0){
+			debug("found monster");
+			return monster;
+		}
+	}
+	debug("can not find monster");
+	delete_mob_iterator(iter);
+	return NULL;
+
 }
 
 // takes a mob pointer and adds a randomly generated monster to the mob.
@@ -106,6 +126,7 @@ void spawn_new_monster(mob_t **mob_handle) {
 	}
 	//debug("storing potentials done");
 	//printf(" -------------- total frequencies %d\n",total);
+	srand(time(NULL));
 	total = rand() % total;
 	//printf("new total after rand() %d\n", total);
 	int j,k;
@@ -153,23 +174,55 @@ void append_monster(mob_t **mob_handle, monster_t *monster) {
 // does not exist in the mob, the function does nothing.
 void delete_monster(mob_t **mob_handle, monster_t *monster) {
 	debug("delete monster");
+
+	/*
+	monster_t *temp;
+	mob_iterator_t *iter = make_mob_iterator(mob_handle);
+	while((temp = next_monster(iter))){
+		if(temp == monster){
+			debug("found monster to delete");
+
+		}
+	}
+	debug("can not find monster to delete");
+	delete_mob_iterator(iter);
+	*/
+
 	int i;
 	mob_t *deref = *mob_handle;
 	if(deref->head->mon == monster){			// if delete first monster in list
-		deref->head = NULL;
-		deref->num = deref->num - 1;
+		debug("monster is first in list");
+		//printf("number of monsters in mob = %d\n",deref->num);  ///////////////////////////////////////////////////////////delete
+		if(deref->num == 1){
+			debug("only monster in list");
+			free(deref->head);
+			deref->head = NULL;
+			deref->num = deref->num - 1;
+			debug("done deleting");
+		} else {
+			debug("more than one monster");
+			mob_node_t *node = deref->head;
+			deref->head = deref->head->next;
+			free(node);
+			deref->num = deref->num - 1;
+			debug("done deleting");
+		}
 	} else {
+		debug("monster is not first in list");
 		mob_node_t *cnode = deref->head;
 		mob_node_t *next = cnode->next;
 		for(i = 1; i < deref->num; i++){
 			if(next->mon == monster){
 				if(i == deref->num-1){		// if delete last monster in list
+					debug("monster is last in list");
+					free(next);
 					cnode->next = NULL;
 				} else {
+					free(next);
 					cnode->next = next->next;
 				}
 				deref->num = deref->num--;
-				free(next);
+				debug("done deleting");
 				break;
 			} else {
 				cnode = next;
@@ -177,6 +230,7 @@ void delete_monster(mob_t **mob_handle, monster_t *monster) {
 			}
 		}
 	}
+
 }
 
 // this function creates and returns a mob iterator object from a mob pointer
