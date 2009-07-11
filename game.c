@@ -13,7 +13,6 @@ typedef struct {
 int fireball(int argc, char **argv);
 int heal(int argc, char **argv);
 int splash(int argc, char **argv);
-int ultima(int argc, char **argv);
 // defines the level_table variable by including the raw text
 // from the level_table file
 #include "level_table"
@@ -86,18 +85,16 @@ void gain_experience(int amount) {
 }
 
 int heal(int argc, char **argv) {
-    if(argc != 1) {
-        printf("You perform incorrect spell. Just 'heal'.\n");
+    if(argc != 2 || strcmp(argv[1], "self") != 0) {
+        printf("Incorrect format.  cast heal self.\n");
         return 0;
     }
 
-    char *target_name;
-
     // heal yourself
-    int damage_amount = (int)(the_player.level*1.5);
+    int damage_amount = (int)(the_player.max_hp*.33);
     the_player.hp+=damage_amount;
     printf("You healed yourself by %d HP", damage_amount);
-    return 40;
+    return 50;
 }
 
 int splash(int argc, char **argv) {
@@ -127,7 +124,7 @@ int splash(int argc, char **argv) {
     int damage_amount = (int)(the_player.level*1.5);
     printf("You threw water across room at the %s, doing %d damage.\n", target->name, damage_amount);
     damage(target, damage_amount);
-    return 40;
+    return 25;
 }
 
 
@@ -163,44 +160,4 @@ int fireball(int argc, char **argv) {
     return 40;
 }
 
-int ultima(int argc, char **argv) {
-    if(argc != 1) {
-        printf("NOOB.  ULTIMA needs no arguments!\n");
-        return 0;
-    }
 
-    char *target_name;
-    monster_t *target;
-    mob_iterator_t *iter = make_mob_iterator(&the_player.current_room->mob);
-    printf("1\n");
-    while(target = next_monster(iter), target != NULL){
-    	printf("2\n");
-		if(argc > 2 && !strcmp(argv[1], "at")) {
-			target_name = argv[2];
-		} else {
-			target_name = argv[1];
-		}
-		printf("3\n");
-		// find the monster
-
-		// give up if we can't find it
-		if(target == NULL) {
-			printf("There's no %s here...\n", argv[1]);
-			return 0;
-		}
-		printf("4\n");
-		// inflict damage
-		int playerlvl = the_player.level;
-		printf("%d level \n", playerlvl);
-		printf("pass 4.5");
-		int damage_amount = 100;
-		printf("hello");
-		printf("ULTIMA ATTACK! %d damage to %s.\n", damage_amount, target->name);
-		damage(target, damage_amount);
-		printf("gb");
-		i++;
-    }
-    printf("5\n");
-    delete_mob_iterator(iter);
-    return 0;
-}

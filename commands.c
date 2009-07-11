@@ -25,7 +25,6 @@ cmd_entry_t commands[] = {
     {"status", status,   true},
     {"help",   help,     true},
     {"cast",   cast,     true},
-    {"derrick",godmode_f, false},
 
     // TA FUNCTION FOR PUZZLES 
     {"interact",  interact,    false},
@@ -76,12 +75,7 @@ bool is_player_vulnerable(char *name) {
 int status(int argc, char **argv) {
     printf("level: %d\n", get_level(the_player.experience));
     printf("exp:   %d\n", the_player.experience);
-    if(the_player.godmode){
-    	printf("hp:    MAX\n");
-    	printf("GOD MODE: ON\n");
-    } else {
-    	printf("hp:    %d/%d\n", the_player.hp, the_player.max_hp);
-    }
+    printf("hp:    %d/%d\n", the_player.hp, the_player.max_hp);
     additional_status();
     return STATUS_TIME;
 }
@@ -279,15 +273,14 @@ int go(int argc, char **argv) {
 // uses get_spell_level() to check that the spell's level is <= the player's level before casting
 // this function should return whatver the spell itself returns.
 int cast(int argc, char **argv) {
-	if(get_spell(argv[1]) == NULL){
+	if(argc != 3){
+		printf("Incorrect Format. cast <spell name> <monster name>\n");
+	} else if(get_spell(argv[1]) == NULL){
 		printf("No such spell, %s\n", argv[1]);
 	} else {
 		int required_lvl = get_spell_level(argv[1]);
 		if(required_lvl > the_player.level){
 			printf("Can not cast %s. Minimal level required is %d. Your level is %d.\n", argv[1], required_lvl, the_player.level);
-		} else if(strcmp(argv[1], "ultima") == 0){
-			spell_fxn spell = get_spell(argv[1]);
-			return spell(argc - 1, argv);
 		} else {
 			spell_fxn spell = get_spell(argv[1]);
 			char **newargv[2];
@@ -298,22 +291,4 @@ int cast(int argc, char **argv) {
 	}
 
     return 0;
-}
-
-int godmode_f(int argc, char **argv){
-	if(argc != 2){
-		printf("WRONG!\n");
-	} else if(strcmp(argv[1], "on") == 0){
-		printf("DERRICK MODE ACTIVATED!!\n");
-		the_player.godmode = 1;
-		the_player.level = 10;
-		the_player.experience = 999;
-	} else {
-		int i;
-		for(i = 0; i < argc; i++){
-			printf("%s ", argv[i]);
-		}
-		printf("\n");
-	}
-	return 0;
 }

@@ -29,25 +29,20 @@ void tick_world(int elapsed_time, bool player_vulnerable) {
             monster_t *attacker;
             mob_iterator_t *iter = make_mob_iterator(the_player.current_room->mob);
             while((attacker = next_monster(iter))) {
+                // does monster attack? 75% chance...
+                if (rand() % 4 <= 0) {
+                    printf("The %s tries to %s you, but misses\n",
+                            attacker->name,attacker->attack);   
+                    continue;
+                }
 
-            	if(the_player.godmode){
-            		printf("The %s tries to %s, but CAN'T!!!\n\n\tDERRICKMODE\n\n\n", attacker->name,attacker->attack);
-            	} else {
-					// does monster attack? 75% chance...
-					if (rand() % 4 <= 0) {
-						printf("The %s tries to %s you, but misses\n",
-								attacker->name,attacker->attack);
-						continue;
-					}
-
-					printf("The %s %ss you for %d points of damage\n",
-							attacker->name, attacker->attack, attacker->damage);
-					the_player.hp -= attacker->damage;
-					if(the_player.hp <= 0) {
-						printf("that %s was too much for you. you die.\n", attacker->attack);
-						exit(0);
-					}
-            	}
+                printf("The %s %ss you for %d points of damage\n",
+                        attacker->name, attacker->attack, attacker->damage);
+                the_player.hp -= attacker->damage;
+                if(the_player.hp <= 0) {
+                    printf("that %s was too much for you. you die.\n", attacker->attack);
+                    exit(0);
+                }
             }
             delete_mob_iterator(iter);
         }
